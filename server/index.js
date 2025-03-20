@@ -1,8 +1,9 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import SpotifyWebApi from "spotify-web-api-node";
+import SpotifyWebApi from "spotify-web-api-node"; 
 import mongoose from "mongoose";
+import spotifyRouter from "./routes/spotify.route.js"; 
 
 dotenv.config();
 // console.log(process.env.SPOTIFY_CLIENT_ID);
@@ -19,29 +20,8 @@ mongoose.connect(mongoURI)
 app.use(cors());
 app.use(express.json());
 
-const spotifyApi = new SpotifyWebApi({
-  clientId: process.env.SPOTIFY_CLIENT_ID,
-  clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-  redirectUri: process.env.SPOTIFY_REDIRECT_URI,
-});
-
-app.post("/login", (req, res) => {
-  const { code } = req.body;
-
-  spotifyApi
-    .authorizationCodeGrant(code)
-    .then((data) => {
-      res.json({
-        accessToken: data.body.access_token,
-        refreshToken: data.body.refresh_token,
-        expiresIn: data.body.expires_in,
-      });
-    })
-    .catch((err) => {
-      console.error("Error during authentication:", err);
-      res.sendStatus(400);
-    });
-});
+// add main routes here:
+app.use("/server/spotify", spotifyRouter);
 
 // root
 app.get("/", (req, res) => {
