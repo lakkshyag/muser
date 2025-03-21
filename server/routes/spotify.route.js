@@ -5,9 +5,8 @@ import { fetchPlaylistTracks, fetchAlbumTracks, getPreviewUrlController } from "
 
 const router = express.Router();
 
-router.post("/playlist", fetchPlaylistTracks);
+router.post("/playlist", fetchPlaylistTracks); 
 router.post("/album", fetchAlbumTracks);
-// router.get("/track/:id/preview", getPreviewUrlController);
 router.get("/track/:id/preview", getPreviewUrlController); // new preview route
 
 

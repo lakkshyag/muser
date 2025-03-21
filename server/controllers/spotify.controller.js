@@ -42,7 +42,7 @@ export const fetchPlaylistTracks = async (req, res) => {
     const tracks = data.body.items.map(item => ({
       name: item.track.name,
       artist: item.track.artists.map(artist => artist.name).join(", "),
-      preview_url: item.track.preview_url,
+      id: item.track.id, // ADD this!
     }));
     res.json({ tracks });
   } catch (err) {
@@ -71,7 +71,7 @@ export const fetchAlbumTracks = async (req, res) => {
     const tracks = data.body.items.map(item => ({
       name: item.name,
       artist: item.artists.map(artist => artist.name).join(", "),
-      preview_url: item.preview_url,
+      id: item.id, // ADD this!
     }));
     res.json({ tracks });
   } catch (err) {
