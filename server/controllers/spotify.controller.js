@@ -1,26 +1,7 @@
 // this will contain the majority of the spotify logic
-
-import SpotifyWebApi from "spotify-web-api-node";
+import { authenticateSpotify, spotifyApi } from "../utils/spotifyAuth.js";
 import { cleanSpotifyUrl } from "../utils/cleanSpotifyUrl.js";
 import { getSpotifyPreviewUrl } from "../utils/getPreviewUrl.js";
-import dotenv from "dotenv";
-dotenv.config();
-
-const spotifyApi = new SpotifyWebApi({
-  clientId: process.env.SPOTIFY_CLIENT_ID,
-  clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-  redirectUri: process.env.SPOTIFY_REDIRECT_URI,
-});
-
-// Function to get access token using Client Credentials Flow
-const authenticateSpotify = async () => {
-  try {
-    const data = await spotifyApi.clientCredentialsGrant();
-    spotifyApi.setAccessToken(data.body.access_token);
-  } catch (err) {
-    console.error("Error authenticating Spotify API:", err);
-  }
-};
 
 // Playlist fetch handler
 export const fetchPlaylistTracks = async (req, res) => {
@@ -40,9 +21,7 @@ export const fetchPlaylistTracks = async (req, res) => {
   try {
     const data = await spotifyApi.getPlaylistTracks(playlistId, { limit: 100 });
     const tracks = data.body.items.map(item => ({
-      name: item.track.name,
-      artist: item.track.artists.map(artist => artist.name).join(", "),
-      id: item.track.id, // ADD this!
+      id: item.track.id, // only return the ids
     }));
     res.json({ tracks });
   } catch (err) {
@@ -69,9 +48,7 @@ export const fetchAlbumTracks = async (req, res) => {
   try {
     const data = await spotifyApi.getAlbumTracks(albumId, { limit: 50 });
     const tracks = data.body.items.map(item => ({
-      name: item.name,
-      artist: item.artists.map(artist => artist.name).join(", "),
-      id: item.id, // ADD this!
+      id: item.id, // only return the track ids now;
     }));
     res.json({ tracks });
   } catch (err) {
@@ -80,7 +57,9 @@ export const fetchAlbumTracks = async (req, res) => {
   }
 };
 
-export const getPreviewUrlController = async (req, res) => {
+// gets the preivew url using the preview url util function (scraping from embed);
+// this function calls help from the ..\utils\getPreviewUrl.js which has the main logic
+export const getPreviewUrl = async (req, res) => {
   try {
     const trackId = req.params.id;
     const previewUrl = await getSpotifyPreviewUrl(trackId);
@@ -92,5 +71,35 @@ export const getPreviewUrlController = async (req, res) => {
   } catch (error) {
     console.error("Error fetching preview URL:", error.message);
     res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+// get all details using a track id
+export const getTrackDetails = async (req, res) => {
+  const { id } = req.params;
+  if (!id) return res.status(400).json({ error: "Track ID is required" });
+
+  try {
+    await authenticateSpotify();
+    const data = await spotifyApi.getTrack(id);
+    const track = data.body;
+
+    const trackDetails = {
+      id: track.id,
+      name: track.name,
+      artists: track.artists.map(artist => artist.name),
+      album: {
+        name: track.album.name,
+        image: track.album.images[0]?.url || null
+      },
+      duration_ms: track.duration_ms,
+      external_url: track.external_urls.spotify,
+      popularity: track.popularity
+    };
+
+    res.json({ track: trackDetails });
+  } catch (error) {
+    console.error("Error fetching track details:", error.message);
+    res.status(500).json({ error: "Failed to fetch track details" });
   }
 };
