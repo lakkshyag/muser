@@ -1,5 +1,5 @@
 import React from "react";
-import Player from "./components/Player";
+import Player from "./components/previewTest";
 
 function App() {
   return (
