@@ -1,9 +1,10 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import SpotifyWebApi from "spotify-web-api-node"; 
 import mongoose from "mongoose";
 import spotifyRouter from "./routes/spotify.route.js"; 
+import lobbyRouter from "./routes/lobby.route.js";
+import playerRouter from "./routes/player.route.js";
 
 dotenv.config();
 // console.log(process.env.SPOTIFY_CLIENT_ID);
@@ -22,6 +23,8 @@ app.use(express.json());
 
 // add main routes here:
 app.use("/server/spotify", spotifyRouter);
+app.use("/server/lobby", lobbyRouter);
+app.use("/server/player", playerRouter);
 
 // root
 app.get("/", (req, res) => {
