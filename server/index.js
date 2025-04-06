@@ -1,4 +1,7 @@
 import express from "express";
+import http from "http";
+import {Server} from "socket.io";
+import setupSocket from "./socket.js";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
@@ -12,19 +15,33 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const mongoURI = process.env.MONGO_URI;
+// please dont break this time
+app.use(cors());
+app.use(express.json());
+
+const mongoURI = process.env.MONGO_URI; // database connectivity
 mongoose.connect(mongoURI)
   .then(() => console.log("MongoDB connected successfully"))
   .catch(err => console.error("MongoDB connection error:", err));
 
-// please dont break this time
-app.use(cors());
-app.use(express.json());
 
 // add main routes here:
 app.use("/server/spotify", spotifyRouter);
 app.use("/server/lobby", lobbyRouter);
 app.use("/server/player", playerRouter);
+
+
+const server = http.createServer(app); // giving access to raw http server
+
+const io = new Server(server, { // initialize socket.io with the server;
+  cors: {
+    // origin: "http://localhost:3000", // frontend address;
+    origin: "*", // remove this and set the proper frontend address as origin
+    methods: ["GET", "POST"]
+  }
+});
+
+setupSocket(io);
 
 // root
 app.get("/", (req, res) => {
@@ -32,6 +49,6 @@ app.get("/", (req, res) => {
 });
 
 // start
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });

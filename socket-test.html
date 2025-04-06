@@ -1,0 +1,22 @@
+<!-- sochet-test.html -->
+<!DOCTYPE html>
+<html>
+  <head><title>Socket.IO Test</title></head>
+  <body>
+    <h1>Socket.IO Tester</h1>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+      const socket = io("http://localhost:5000"); // change to your backend port
+
+      socket.on("connect", () => {
+        console.log("Connected:", socket.id);
+        // You can emit something to test
+        socket.emit("test", { msg: "Hello from client" });
+      });
+
+      socket.on("test-response", (data) => {
+        console.log("Response from server:", data);
+      });
+    </script>
+  </body>
+</html>

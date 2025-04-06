@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Socket.IO Lobby Test</title>
+</head>
+<body>
+  <h1>Socket.IO Lobby Tester</h1>
+  <input type="text" id="name" placeholder="Your name">
+  <input type="text" id="lobby" placeholder="Lobby Code">
+  <button onclick="joinLobby()">Join Lobby</button>
+
+  <ul id="messages"></ul>
+
+  <!-- Load Socket.IO client from CDN -->
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    const socket = io("http://localhost:5000");
+
+    socket.on("connect", () => {
+      console.log("Connected to server:", socket.id);
+    });
+
+    function joinLobby() {
+      const name = document.getElementById("name").value;
+      const lobby = document.getElementById("lobby").value;
+
+      const player = {
+        name,
+        socketId: socket.id, // This would normally be set automatically
+      };
+
+      socket.emit("join-lobby", {
+        lobbyCode: lobby,
+        player,
+      });
+
+      console.log(`Joining lobby ${lobby} as ${name}`);
+    }
+
+    socket.on("player-joined", ({ player }) => {
+      const li = document.createElement("li");
+      li.textContent = `New player joined: ${player.name}`;
+      document.getElementById("messages").appendChild(li);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Disconnected from server");
+    });
+  </script>
+</body>
+</html>
