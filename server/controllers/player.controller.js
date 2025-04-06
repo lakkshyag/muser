@@ -23,6 +23,7 @@ export const createGuestPlayer = async (req, res) => {
     }
 };
 
+// normal fetch for players;
 export const getPlayerById = async (req, res) => {
     const { id } = req.params;
     try {
@@ -37,7 +38,7 @@ export const getPlayerById = async (req, res) => {
     }
 };
   
-  // (Optional, if you want to delete old players before creating new ones)
+// deleting an old player for db cleanup
 export const deletePlayerById = async (req, res) => {
     const { id } = req.params;
     try {
@@ -48,6 +49,29 @@ export const deletePlayerById = async (req, res) => {
       res.status(200).json({ message: "Player deleted successfully" });
     } catch (err) {
       console.error("Error deleting player:", err);
+      res.status(500).json({ message: "Server error" });
+    }
+};
+
+// updating old socket id since it keeps getting refreshed;
+export const updatePlayerSocketId = async (req, res) => {
+    const { id } = req.params;
+    const { socketId } = req.body;
+  
+    try {
+      const updatedPlayer = await Player.findByIdAndUpdate(
+        id,
+        { socketId },
+        { new: true }
+      );
+  
+      if (!updatedPlayer) {
+        return res.status(404).json({ message: "Player not found" });
+      }
+  
+      res.json(updatedPlayer);
+    } catch (err) {
+      console.error("Error updating socket ID:", err);
       res.status(500).json({ message: "Server error" });
     }
 };

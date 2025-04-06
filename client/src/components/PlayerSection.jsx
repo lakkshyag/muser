@@ -1,20 +1,48 @@
 import { useEffect, useState } from "react";
 import server from "../utils/server";
-import { io } from "socket.io-client";
-
-// Connect socket outside component scope
-const socket = io("http://localhost:5000", {
-    withCredentials: true
-});
+import socket from "../utils/socket";
 
 const PlayerSection = () => {
   const [name, setName] = useState("");
   const [socketId, setSocketId] = useState(null);
+  const [playerId, setPlayerId] = useState(null);
 
-  useEffect(() => {
+  useEffect(() => { // socket id on connect;
     socket.on("connect", () => {
       console.log("Socket connected with ID:", socket.id);
-      setSocketId(socket.id); // Save socket ID for later
+      setSocketId(socket.id); // will change upon every revresh and nav, so keep updating these
+
+      // try to refresh session if local sotrage already has id;
+      const storedPlayer = JSON.parse(localStorage.getItem("player"));
+      if (storedPlayer && storedPlayer._id) {
+        server
+          .get(`/player/${storedPlayer._id}`)
+          .then((res) => {
+            const player = res.data;
+            setName(player.name);
+            setPlayerId(player._id);
+
+            // update socket ID on backend (since it's changed)
+            return server.put(`/player/${player._id}`, {
+              socketId: socket.id,
+            });
+          })
+          .then(() => {
+            console.log("Restored and updated player socket ID");
+            // emit again:
+            socket.emit("guest-connected", {
+              _id: storedPlayer._id,
+              name: storedPlayer.name,
+              socketId: socket.id,
+            });
+
+          })
+          .catch((err) => {
+            console.warn("Player restoration failed, clearing localStorage");
+            localStorage.removeItem("player");
+          });
+      }
+
     });
 
     socket.on("disconnect", () => {
@@ -32,6 +60,17 @@ const PlayerSection = () => {
         return alert("Please enter a name.");
     }
 
+    // If player exists, delete them first from DB
+    if (playerId) {
+      try {
+        await server.delete(`/player/${playerId}`);
+        localStorage.removeItem("player");
+        console.log("Old player deleted");
+      } catch (err) {
+        console.warn("Failed to delete old player", err);
+      }
+    }
+
     try {
       const res = await server.post("/player/guest", { name, socketId });
       const player = res.data;
@@ -39,7 +78,7 @@ const PlayerSection = () => {
       console.log(player);
 
       // Save to localStorage
-      localStorage.setItem("muser_player", JSON.stringify(player)); // change to player, muser_player is very tacky
+      localStorage.setItem("player", JSON.stringify(player)); 
 
       // Send info to backend via socket
       socket.emit("guest-connected", player);
