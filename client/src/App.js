@@ -1,12 +1,16 @@
-import React from "react";
-import Player from "./components/previewTest";
+// client/src/App.js
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import Lobby from "./pages/Lobby";
 
 function App() {
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-900 text-white">
-      <h1 className="text-3xl mb-6">Muser Test</h1>
-      <Player />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        {/* <Route path="/lobby/:code" element={<Lobby />} /> */}
+      </Routes>
+    </Router>
   );
 }
 

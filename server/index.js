@@ -16,7 +16,10 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // please dont break this time
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000", // use exact origin instead of "*"
+  credentials: true
+}));
 app.use(express.json());
 
 const mongoURI = process.env.MONGO_URI; // database connectivity
@@ -35,9 +38,10 @@ const server = http.createServer(app); // giving access to raw http server
 
 const io = new Server(server, { // initialize socket.io with the server;
   cors: {
-    // origin: "http://localhost:3000", // frontend address;
-    origin: "*", // remove this and set the proper frontend address as origin
-    methods: ["GET", "POST"]
+    origin: "http://localhost:3000", // frontend address;
+    // origin: "*", // remove this and set the proper frontend address as origin
+    methods: ["GET", "POST"],
+    credentials:true
   }
 });
 
