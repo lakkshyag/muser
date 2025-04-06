@@ -39,7 +39,7 @@ const PlayerSection = () => {
       console.log(player);
 
       // Save to localStorage
-      localStorage.setItem("muser_player", JSON.stringify(player));
+      localStorage.setItem("muser_player", JSON.stringify(player)); // change to player, muser_player is very tacky
 
       // Send info to backend via socket
       socket.emit("guest-connected", player);

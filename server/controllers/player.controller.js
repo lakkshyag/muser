@@ -1,7 +1,7 @@
 import Player from "../models/player.model.js";
 
 // create a guest player, name is REQUIRED, can be duplicate as well 
-// mght also need to gneerate socket id and give it to player here only;
+// mght also need to gneerate socket id and give it to player here only <- socket id shenanigans done;
 export const createGuestPlayer = async (req, res) => {
     try {
         const { name, socketId } = req.body;
@@ -20,5 +20,34 @@ export const createGuestPlayer = async (req, res) => {
     } catch (error) {
         console.error("Error creating guest player:", error);
         return res.status(500).json({ error: "Failed to create guest player" });
+    }
+};
+
+export const getPlayerById = async (req, res) => {
+    const { id } = req.params;
+    try {
+      const player = await Player.findById(id);
+      if (!player) {
+        return res.status(404).json({ message: "Player not found" });
+      }
+      res.status(200).json(player);
+    } catch (err) {
+      console.error("Error fetching player:", err);
+      res.status(500).json({ message: "Server error" });
+    }
+};
+  
+  // (Optional, if you want to delete old players before creating new ones)
+export const deletePlayerById = async (req, res) => {
+    const { id } = req.params;
+    try {
+      const deleted = await Player.findByIdAndDelete(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Player not found" });
+      }
+      res.status(200).json({ message: "Player deleted successfully" });
+    } catch (err) {
+      console.error("Error deleting player:", err);
+      res.status(500).json({ message: "Server error" });
     }
 };
