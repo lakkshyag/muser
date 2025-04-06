@@ -1,57 +1,77 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import server from "../utils/server";
+import usePlayerStore from "../store/usePlayerStore";
+
 import socket from "../utils/socket";
 
 const LobbySection = () => {
+  // const [player, setPlayer] = useState(null);
   const navigate = useNavigate();
+  const { player, setPlayer } = usePlayerStore(); // use global state
 
-  const handleCreateRoom = async () => {
-    const player = JSON.parse(localStorage.getItem("player")); // fetch the current user from browser local storage;
-
+  useEffect(() => {
     if (!player) {
-      alert("Please join as a player first.");
-      return;
+      navigate("/");
     }
+  }, [player, navigate]);
 
+  if (!player) return null; // don't render the rest until navigate happens
+
+
+  const handleCreateLobby = async () => {
     try {
       const res = await server.post("/lobby/create", {
         hostId: player._id,
       });
 
-      const lobby = res.data;
+      const createdLobby = res.data;
+      console.log("Lobby created:", createdLobby);
 
-      console.log("Created lobby:", lobby);
-
-      // Save lobby data to localStorage (optional but useful for persistence)
-      localStorage.setItem("lobby", JSON.stringify(lobby));
-
-      // Join the room via socket
-      socket.emit("join-lobby", {
-        lobbyCode: lobby.code,
-        player,
+      // Update in Zustand
+      setPlayer({
+        ...player,
+        lobbyCode: createdLobby.code,
+        isHost: true,
+        score: 0,
       });
 
-      // Navigate to Lobby page
-      navigate("/lobby");
+      // Update player in MongoDB
+      await server.put(`/player/${player._id}`, {
+        lobbyCode: createdLobby.code,
+        isHost: true,
+        score: 0,
+      });
+
+      // Navigate to lobby, Lobby.jsx will fetch lobby info using player ID
+      navigate(`/lobby/${createdLobby.code}`);
     } catch (err) {
-      console.error("Error creating lobby:", err);
-      alert("Failed to create room.");
+      console.error("Failed to create lobby:", err);
+      alert("Failed to create lobby. Please try again.");
     }
+  };
+
+  const handleJoinLobby = () => {
+    navigate("/join"); // You can build a join page later if not already made
   };
 
   return (
     <div className="text-center">
-      <p className="text-lg mb-2">Room Options:</p>
-      <div className="flex gap-4 justify-center">
+      <p className="text-lg mb-4">Welcome, {player.name}!</p>
+
+      <div className="flex justify-center gap-4">
         <button
+          onClick={handleCreateLobby}
           className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
-          onClick={handleCreateRoom}
         >
-          Create Room
+          Create Lobby
         </button>
-        <button className="bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded">
-          Join Room
+
+        <button
+          onClick={handleJoinLobby}
+          className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded"
+        >
+          Join Lobby
         </button>
       </div>
     </div>

@@ -8,8 +8,10 @@ export const createLobby = async (req, res) => { // create a new lobby
     const { hostId } = req.body; // will get the mongodb _id from the request body now;
     if (!hostId) return res.status(400).json({ error: "Host ID is required" }); // obviously duh;
 
+    console.log("creating lobby with: ", hostId);
+
     const hostPlayer = await Player.findById(hostId); // mongodb id search;
-    if (!hostPlayer) return res.states(404).json({error: "Host player not found"}); // if we cant find the player in the DB;
+    if (!hostPlayer) return res.status(404).json({error: "Host player not found"}); // if we cant find the player in the DB;
     if (hostPlayer.lobbyCode) return res.status(400).json({ error: "Player is already in another lobby" }); // cannot create a room while already in one
 
     const lobbyCode = generateLobbyCode(); // this is the 6 digit code which users will enter to join;

@@ -1,43 +1,58 @@
 import { useEffect, useState } from "react";
 import server from "../utils/server";
 import socket from "../utils/socket";
+import usePlayerStore from "../store/usePlayerStore";
 
 const PlayerSection = () => {
-  const [name, setName] = useState("");
-  const [playerId, setPlayerId] = useState(null);
+  const { player, setPlayer, resetPlayer } = usePlayerStore();
+  const [name, setName] = useState(player?.name || "");
+  // const [playerId, setPlayerId] = useState(null); // rip local state management, you wont be missed;
 
   // On socket connect or page load
   useEffect(() => {
+    if (player?.name && name !== player.name) {
+      setName(player.name);
+    }
+  }, [player?.name]);
+
+  useEffect(() => {
     socket.on("connect", async () => {
       console.log("Socket connected:", socket.id);
-
       const storedId = localStorage.getItem("player_id");
 
       if (storedId) {
         try {
           // Fetch fresh player data
           const res = await server.get(`/player/${storedId}`);
-          const player = res.data;
+          const fetchedPlayer = res.data;
 
-          setPlayerId(player._id);
-          setName(player.name);
+          console.log(fetchedPlayer);
+
+          setPlayer(fetchedPlayer);
+          setName(fetchedPlayer.name);
+
+          // console.log("pre socket upd");
 
           // Update socketId if changed
-          if (player.socketId !== socket.id) {
-            await server.put(`/player/${player._id}`, { socketId: socket.id });
+          if (fetchedPlayer.socketId !== socket.id) {
+            await server.put(`/player/${fetchedPlayer._id}`, { socketId: socket.id });
             console.log("Updated socket ID for restored player");
           }
 
+          // console.log("post socket upd");
+
+
           // Notify backend of reconnection
           socket.emit("guest-connected", {
-            _id: player._id,
-            name: player.name,
+            ...fetchedPlayer,
             socketId: socket.id,
           });
+
         } catch (err) {
           console.warn("Failed to restore player, clearing localStorage");
           localStorage.removeItem("player_id");
-          setPlayerId(null);
+          resetPlayer();
+          alert("Your session expired. Please rejoin.");
         }
       }
     });
@@ -57,9 +72,9 @@ const PlayerSection = () => {
       return alert("Please enter a name.");
     }
 
-    if (playerId) {
+    if (player) {
       try {
-        await server.delete(`/player/${playerId}`);
+        await server.delete(`/player/${player._id}`);
         console.log("Old player deleted");
         localStorage.removeItem("player_id");
       } catch (err) {
@@ -69,13 +84,12 @@ const PlayerSection = () => {
 
     try {
       const res = await server.post("/player/guest", {
-        name,
+        name: name,
         socketId: socket.id,
       });
 
       const newPlayer = res.data;
-      setPlayerId(newPlayer._id);
-
+      setPlayer(newPlayer);
       // Store only the ID
       localStorage.setItem("player_id", newPlayer._id);
 

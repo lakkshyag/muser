@@ -53,17 +53,15 @@ export const deletePlayerById = async (req, res) => {
     }
 };
 
-// updating old socket id since it keeps getting refreshed;
-export const updatePlayerSocketId = async (req, res) => {
+// updating player details
+export const updatePlayer = async (req, res) => {
     const { id } = req.params;
-    const { socketId } = req.body;
+    const updateFields = req.body;
   
     try {
-      const updatedPlayer = await Player.findByIdAndUpdate(
-        id,
-        { socketId },
-        { new: true }
-      );
+      const updatedPlayer = await Player.findByIdAndUpdate(id, updateFields, {
+        new: true,
+      });
   
       if (!updatedPlayer) {
         return res.status(404).json({ message: "Player not found" });
@@ -71,7 +69,7 @@ export const updatePlayerSocketId = async (req, res) => {
   
       res.json(updatedPlayer);
     } catch (err) {
-      console.error("Error updating socket ID:", err);
+      console.error("Error updating player:", err);
       res.status(500).json({ message: "Server error" });
     }
 };
