@@ -1,4 +1,3 @@
-// client/src/App.js
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Lobby from "./pages/Lobby";
@@ -8,7 +7,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        {/* <Route path="/lobby/:code" element={<Lobby />} /> */}
+        <Route path="/lobby" element={<Lobby />} />
       </Routes>
     </Router>
   );
