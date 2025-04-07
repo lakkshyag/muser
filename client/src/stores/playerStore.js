@@ -6,14 +6,30 @@ import { create } from "zustand";
 const usePlayerStore = create((set) => ({
   player: null, // whole player object { _id, name, socketId, score, lobbyCode, etc }
 
-  setPlayer: (player) => set({ player }),
+  setPlayer: (player) =>
+    set({
+      player: {
+        _id: player._id ?? null,
+        name: player.name ?? "",
+        socketId: player.socketId ?? null,
+        score: player.score ?? 0,
+        lobbyCode: player.lobbyCode ?? null,
+        isHost: player.isHost ?? false,
+      },
+    }),
 
   updatePlayerField: (field, value) =>
     set((state) => ({
-      player: { ...state.player, [field]: value },
+      player: {
+        ...state.player,
+        [field]: value,
+      },
     })),
 
-  resetPlayer: () => set({ player: null }),
+  resetPlayer: () =>
+    set({
+      player: null,
+    }),
 }));
 
 export default usePlayerStore;

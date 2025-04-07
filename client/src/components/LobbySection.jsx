@@ -1,50 +1,33 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import server from "../utils/server";
-import usePlayerStore from "../store/usePlayerStore";
-
-import socket from "../utils/socket";
+import usePlayerStore from "../stores/playerStore.js";
 
 const LobbySection = () => {
-  // const [player, setPlayer] = useState(null);
   const navigate = useNavigate();
   const { player, setPlayer } = usePlayerStore(); // use global state
 
-  useEffect(() => {
-    if (!player) {
-      navigate("/");
-    }
-  }, [player, navigate]);
-
-  if (!player) return null; // don't render the rest until navigate happens
-
-
   const handleCreateLobby = async () => {
-    try {
-      const res = await server.post("/lobby/create", {
+    try { 
+      const res = await server.post("/lobby/create", { // make a lobby with the player id as host;
         hostId: player._id,
       });
 
-      const createdLobby = res.data;
-      console.log("Lobby created:", createdLobby);
+      const { lobby } = res.data; // destructure from the response properly
 
-      // Update in Zustand
-      setPlayer({
+      setPlayer({ // update the zustand state with the lobby code and host;
         ...player,
-        lobbyCode: createdLobby.code,
+        lobbyCode: lobby.code,
         isHost: true,
         score: 0,
       });
 
-      // Update player in MongoDB
-      await server.put(`/player/${player._id}`, {
-        lobbyCode: createdLobby.code,
+      await server.put(`/player/${player._id}`, { // need to update current player in the db as well
+        lobbyCode: lobby.code,
         isHost: true,
         score: 0,
       });
 
-      // Navigate to lobby, Lobby.jsx will fetch lobby info using player ID
-      navigate(`/lobby/${createdLobby.code}`);
+      navigate(`/lobby/${lobby.code}`); // navigate the current player to the lobby
     } catch (err) {
       console.error("Failed to create lobby:", err);
       alert("Failed to create lobby. Please try again.");
@@ -52,12 +35,13 @@ const LobbySection = () => {
   };
 
   const handleJoinLobby = () => {
-    navigate("/join"); // You can build a join page later if not already made
+    navigate("/join"); // TODO: but i guess this should be relatively simpler? (famous last words)
   };
 
   return (
     <div className="text-center">
-      <p className="text-lg mb-4">Welcome, {player.name}!</p>
+      <p className="text-lg mb-4">Welcome, {player.name}!</p> 
+      {/* this welcome can be removed; */}
 
       <div className="flex justify-center gap-4">
         <button
@@ -73,6 +57,7 @@ const LobbySection = () => {
         >
           Join Lobby
         </button>
+        {/* this button is TODO rn */}
       </div>
     </div>
   );

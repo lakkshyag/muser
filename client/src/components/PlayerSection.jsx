@@ -1,106 +1,55 @@
 import { useEffect, useState } from "react";
 import server from "../utils/server";
 import socket from "../utils/socket";
-import usePlayerStore from "../store/usePlayerStore";
+import usePlayerStore from "../stores/playerStore.js";
 
 const PlayerSection = () => {
+  
   const { player, setPlayer, resetPlayer } = usePlayerStore();
   const [name, setName] = useState(player?.name || "");
-  // const [playerId, setPlayerId] = useState(null); // rip local state management, you wont be missed;
 
-  // On socket connect or page load
-  useEffect(() => {
+  useEffect(() => { // for the form, if global state already has values use that in the form;
     if (player?.name && name !== player.name) {
       setName(player.name);
     }
   }, [player?.name]);
 
-  useEffect(() => {
-    socket.on("connect", async () => {
-      console.log("Socket connected:", socket.id);
-      const storedId = localStorage.getItem("player_id");
+  const handleNameInput = (e) => { // taking input in the form;
+    setName(e.target.value)
+    // console.log(name);
+  }
 
-      if (storedId) {
-        try {
-          // Fetch fresh player data
-          const res = await server.get(`/player/${storedId}`);
-          const fetchedPlayer = res.data;
-
-          console.log(fetchedPlayer);
-
-          setPlayer(fetchedPlayer);
-          setName(fetchedPlayer.name);
-
-          // console.log("pre socket upd");
-
-          // Update socketId if changed
-          if (fetchedPlayer.socketId !== socket.id) {
-            await server.put(`/player/${fetchedPlayer._id}`, { socketId: socket.id });
-            console.log("Updated socket ID for restored player");
-          }
-
-          // console.log("post socket upd");
-
-
-          // Notify backend of reconnection
-          socket.emit("guest-connected", {
-            ...fetchedPlayer,
-            socketId: socket.id,
-          });
-
-        } catch (err) {
-          console.warn("Failed to restore player, clearing localStorage");
-          localStorage.removeItem("player_id");
-          resetPlayer();
-          alert("Your session expired. Please rejoin.");
-        }
-      }
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Socket disconnected");
-    });
-
-    return () => {
-      socket.off("connect");
-      socket.off("disconnect");
-    };
-  }, []);
-
-  const handleGuestJoin = async () => {
-    if (!name || !socket.id) {
+  const handleGuestJoin = async () => { // for the guest join thing;
+    if (!name || !socket.id) { // no name entry or no socket id
       return alert("Please enter a name.");
     }
 
-    if (player) {
-      try {
-        await server.delete(`/player/${player._id}`);
-        console.log("Old player deleted");
+    if (player) { // if player already exists in the state;
+      try { // use their id and see if db has that player id
+        await server.delete(`/player/${player._id}`); // if yes, remove else it will cause inconsistency;
+        console.log("Old player deleted"); 
         localStorage.removeItem("player_id");
-      } catch (err) {
+      } catch (err) { // if unable to delete (99% times this will happen when that entry does not exist only);
         console.warn("Failed to delete old player", err);
       }
     }
 
-    try {
+    try { // now, we try to create the new player;
       const res = await server.post("/player/guest", {
-        name: name,
-        socketId: socket.id,
+        name: name, // name 
+        socketId: socket.id, // from socket id (VERY IMP)
       });
 
-      const newPlayer = res.data;
-      setPlayer(newPlayer);
-      // Store only the ID
-      localStorage.setItem("player_id", newPlayer._id);
+      const newPlayer = res.data; // we get the player
+      setPlayer(newPlayer); // setthe player as the zustand global state;
+      localStorage.setItem("player_id", newPlayer._id); // and assign in local storage (just the id);
 
-      // Notify backend
-      socket.emit("guest-connected", newPlayer);
-
-      console.log("Guest player created:", newPlayer);
+      socket.emit("guest-connected", newPlayer); // emmit that a new guest has connected;
+      console.log("Guest player created:", newPlayer); // just for checking, can be removed
       alert(`Welcome, ${newPlayer.name}!`);
     } catch (err) {
       console.error("Failed to create guest player:", err);
-      alert("Something went wrong.");
+      alert("Something went wrong, please try again.");
     }
   };
 
@@ -113,7 +62,7 @@ const PlayerSection = () => {
         placeholder="Enter your name"
         className="border px-3 py-2 rounded mb-3 w-60 text-black"
         value={name}
-        onChange={(e) => setName(e.target.value)}
+        onChange={handleNameInput}
       />
 
       <div className="flex justify-center">
