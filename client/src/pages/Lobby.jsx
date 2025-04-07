@@ -4,31 +4,51 @@ import usePlayerStore from "../stores/playerStore.js";
 import useLobbyStore from "../stores/lobbyStore.js";
 import useRestorePlayer from "../hooks/restorePlayer.js";
 import useRestoreLobby from "../hooks/restoreLobby.js";
+import server from "../utils/server.js";
+
 
 const Lobby = () => {
   const navigate = useNavigate();
   const { player } = usePlayerStore();
-  const { code, players, hostId } = useLobbyStore();
+  const { code, players, hostId, resetLobby } = useLobbyStore();
+  
+  const playerRestored = useRestorePlayer();   // returns true | false | null
+  const lobbyRestored = useRestoreLobby(playerRestored == true); // only try once player is ready
+  
   const [loading, setLoading] = useState(true);
 
-  useRestorePlayer();
-  useRestoreLobby();
+  console.log("pres", playerRestored);
+  console.log("lres", lobbyRestored);
 
   console.log(player);
   console.log(code);
 
-  // Watch for when restore finishes and player/lobby are valid
   useEffect(() => {
-    if (player && code) {
-      setLoading(false);
+
+    if (playerRestored === null || lobbyRestored === null) return; // react is making me go insane
+
+    if (playerRestored === false || lobbyRestored === false) {
+      navigate("/"); // return to home if either lobby or player zustand fail 
+      return; 
     }
 
-    if (!player) {
-      navigate("/"); // if player somehow doesn't exist, go back
+    if (playerRestored === true && lobbyRestored === true) {
+      setLoading(false); // set loading as false if both player and lobby zustand get loaded
     }
-  }, [player, code, navigate]);
+  }, [playerRestored, lobbyRestored, navigate]);
 
-  if (loading) return <div className="text-center mt-10">Loading lobby...</div>;
+  const handleLeaveLobby = async () => {
+    try {
+      await server.post("/lobby/leave", { playerId: player._id });
+      resetLobby(); 
+      navigate("/"); 
+    } catch (err) {
+      console.error("Failed to leave lobby:", err);
+      alert("Error leaving lobby. Please try again.");
+    }
+  };
+
+  if (loading) return <div className="text-center mt-10">Loading lobby...</div>; // maybe make a cute loading animation afterwards?
 
   return (
     <div className="max-w-3xl mx-auto mt-10 px-4">
@@ -56,6 +76,13 @@ const Lobby = () => {
           ))}
         </ul>
       </div>
+
+      <button
+        onClick={handleLeaveLobby}
+        className="mt-6 block mx-auto bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+      >
+        Leave Lobby
+      </button>
     </div>
   );
 };

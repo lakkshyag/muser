@@ -3,7 +3,7 @@ import { create } from "zustand";
 // this is so the info isnt lost when moving between the pages
 // could query info from the db every time but that might take
 // its toll if done too many times. this seems better to me 
-const usePlayerStore = create((set) => ({
+const usePlayerStore = create((set) => ({ // also the actual structure for this is not final, might get changed
   player: null, // whole player object { _id, name, socketId, score, lobbyCode, etc }
 
   setPlayer: (player) =>

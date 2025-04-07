@@ -1,11 +1,11 @@
 import { create } from "zustand";
 
-const useLobbyStore = create((set) => ({
+const useLobbyStore = create((set) => ({ // will most probably be changed
   code: null,
   players: [],
   hostId: null,
   playlistIds: [],
-  status: "waiting", // matching the enum in MongoDB: "waiting" or "in_progress"
+  status: "waiting", 
 
   setLobby: ({ code, players, hostId, playlistIds, status }) =>
     set({
