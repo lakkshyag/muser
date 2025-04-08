@@ -1,11 +1,19 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import server from "../utils/server";
 import usePlayerStore from "../stores/playerStore.js";
+import useLobbyStore from "../stores/lobbyStore";
 
 const LobbySection = () => {
   const navigate = useNavigate();
   const { player, setPlayer } = usePlayerStore(); // use global state
+  const [code, setCode] = useState("");
+  const { setLobby } = useLobbyStore();
 
+  const handleCodeInput = (e) => { // taking input in the form;
+    setCode(e.target.value)
+    // console.log(name);
+  }
   const handleCreateLobby = async () => {
     try { 
       const res = await server.post("/lobby/create", { // make a lobby with the player id as host;
@@ -34,8 +42,40 @@ const LobbySection = () => {
     }
   };
 
-  const handleJoinLobby = () => {
-    navigate("/join"); // TODO: but i guess this should be relatively simpler? (famous last words)
+  const handleJoinLobby = async () => {
+    try {
+      // Join the lobby
+      const res = await server.post("/lobby/join", {
+        playerId: player._id,
+        code: code.trim().toUpperCase(),
+      });
+  
+      const { lobby } = res.data;
+  
+      // Update player Zustand state
+      setPlayer({
+        ...player,
+        lobbyCode: lobby.code,
+        isHost: false,
+        score: 0,
+      });
+  
+      // Update player in DB
+      await server.put(`/player/${player._id}`, {
+        lobbyCode: lobby.code,
+        isHost: false,
+        score: 0,
+      });
+  
+      // Update lobby Zustand state (if you use `setLobby`)
+      setLobby(lobby);
+  
+      // Navigate to the lobby page
+      navigate(`/lobby/${lobby.code}`);
+    } catch (err) {
+      console.error("Failed to join lobby:", err);
+      alert("Could not join lobby. Please check the code and try again.");
+    }
   };
 
   return (
@@ -44,19 +84,30 @@ const LobbySection = () => {
       {/* this welcome can be removed; */}
 
       <div className="flex justify-center gap-4">
-        <button
-          onClick={handleCreateLobby}
-          className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
-        >
-          Create Lobby
-        </button>
+        <div className="create-section">
+          <button
+            onClick={handleCreateLobby}
+            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
+          >
+            Create Lobby
+          </button>
+        </div>
 
-        <button
-          onClick={handleJoinLobby}
-          className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded"
-        >
-          Join Lobby
-        </button>
+        <div className="join-section">
+          <input
+            type="text"
+            placeholder="Enter Lobby Code"
+            value={code}
+            onChange={handleCodeInput}
+            className="border p-2 rounded text-black"
+          />
+          <button
+            onClick={handleJoinLobby}
+            className="ml-2 bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Join Lobby
+          </button>
+        </div>
         {/* this button is TODO rn */}
       </div>
     </div>
