@@ -4,8 +4,8 @@ import usePlayerStore from "../stores/playerStore.js";
 import useLobbyStore from "../stores/lobbyStore.js";
 import useRestorePlayer from "../hooks/restorePlayer.js";
 import useRestoreLobby from "../hooks/restoreLobby.js";
+import useDetectBackButton from "../hooks/detectBackButton.js";
 import server from "../utils/server.js";
-
 
 const Lobby = () => {
   const navigate = useNavigate();
@@ -13,15 +13,9 @@ const Lobby = () => {
   const { code, players, hostId, resetLobby } = useLobbyStore();
   
   const playerRestored = useRestorePlayer();   // returns true | false | null
-  const lobbyRestored = useRestoreLobby(playerRestored == true); // only try once player is ready
+  const lobbyRestored = useRestoreLobby(playerRestored === true); // only try once player is ready
   
   const [loading, setLoading] = useState(true);
-
-  console.log("pres", playerRestored);
-  console.log("lres", lobbyRestored);
-
-  console.log(player);
-  console.log(code);
 
   useEffect(() => {
 
@@ -48,6 +42,7 @@ const Lobby = () => {
     }
   };
 
+  useDetectBackButton(handleLeaveLobby);
   if (loading) return <div className="text-center mt-10">Loading lobby...</div>; // maybe make a cute loading animation afterwards?
 
   return (
