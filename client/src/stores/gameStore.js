@@ -8,8 +8,6 @@ const useGameStore = create((set) => ({ // dummy, will modify later
   inputMode: "mcq", // or "typing" 
   gameMode: "guess-song",   // guess-song | guess-artist | guess-album (future)
 
-
-  // Update functions
   setGameStarted: (started) => set({ gameStarted: started }),
   setTotalRounds: (rounds) => set({ totalRounds: rounds }),
   setRoundTime: (time) => set({ roundTime: time }),

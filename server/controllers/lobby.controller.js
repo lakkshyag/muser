@@ -108,3 +108,33 @@ export const getLobbyDetails = async (req, res) => { // get details using the co
     res.status(500).json({ error: "Failed to fetch lobby details" });
   }
 };
+
+export const getGameSettings = async (req, res) => { // getting the current game settings
+  try { 
+    const lobby = await Lobby.findOne({ code: req.params.code }); // if that lobby with this code exists
+    if (!lobby) return res.status(404).json({ message: "Lobby not found" });
+
+    res.json(lobby.gameSettings);
+  } catch (err) {
+    console.error("Error getting game settings:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const updateGameSettings = async (req, res) => { // updating the game settings
+  try {
+    const settings  = req.body; // please think about the destructures and stuff;
+
+    const lobby = await Lobby.findOneAndUpdate(
+      { code: req.params.code },
+      { $set: { gameSettings: settings } },
+      { new: true }
+    );
+
+    if (!lobby) return res.status(404).json({ message: "Lobby not found" });
+    res.json(lobby.gameSettings);
+  } catch (err) {
+    console.error("Error updating game settings:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
