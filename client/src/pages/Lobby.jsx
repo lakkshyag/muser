@@ -6,19 +6,19 @@ import useRestorePlayer from "../hooks/restorePlayer.js";
 import useRestoreLobby from "../hooks/restoreLobby.js";
 import useDetectBackButton from "../hooks/detectBackButton.js";
 import server from "../utils/server.js";
+import socket from "../utils/socket.js";
 
 const Lobby = () => {
   const navigate = useNavigate();
   const { player } = usePlayerStore();
-  const { code, players, hostId, resetLobby } = useLobbyStore();
+  const { code, players, hostId, resetLobby, setPlayers } = useLobbyStore();
   
   const playerRestored = useRestorePlayer();   // returns true | false | null
   const lobbyRestored = useRestoreLobby(playerRestored === true); // only try once player is ready
   
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-
+  useEffect(() => { // this one is for the restore logic (handling refreshes);
     if (playerRestored === null || lobbyRestored === null) return; // react is making me go insane
 
     if (playerRestored === false || lobbyRestored === false) {
@@ -31,6 +31,31 @@ const Lobby = () => {
     }
   }, [playerRestored, lobbyRestored, navigate]);
 
+  useEffect(() => { // this is for actually emmitting the event after joining the lobby;
+    if (player && player._id && code) { // if player exists with a id and code as well;
+      console.log("emitting");
+      socket.emit("join-lobby", {
+        playerId: player._id,
+        lobbyCode: code,
+      });
+    }
+  }, [player?._id, code]);
+
+  useEffect(() => { // this one is for dynamic player joins;
+    if (!player || !code) return; // should not ideally hppen;
+  
+    const handlePlayerJoined = (updatedPlayers) => { // get the updated player list;
+      console.log("Received updated players:", updatedPlayers);
+      setPlayers(updatedPlayers);
+    };
+  
+    socket.on("player-joined", handlePlayerJoined);
+  
+    return () => {
+      socket.off("player-joined", handlePlayerJoined);
+    };
+  }, [player, code, setPlayers]);
+  
   const handleLeaveLobby = async () => {
     try {
       await server.post("/lobby/leave", { playerId: player._id });

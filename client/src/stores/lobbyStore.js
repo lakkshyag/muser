@@ -21,6 +21,11 @@ const useLobbyStore = create((set) => ({ // will most probably be changed
       players: [...state.players, player],
     })),
 
+  setPlayers: (players) =>
+    set((state) => ({
+      players,
+    })),
+
   removePlayer: (socketId) =>
     set((state) => ({
       players: state.players.filter((p) => p.socketId !== socketId),

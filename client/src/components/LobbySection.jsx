@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import server from "../utils/server";
+import socket from "../utils/socket.js";
 import usePlayerStore from "../stores/playerStore.js";
 import useLobbyStore from "../stores/lobbyStore";
 
@@ -44,34 +45,29 @@ const LobbySection = () => {
 
   const handleJoinLobby = async () => {
     try {
-      // Join the lobby
-      const res = await server.post("/lobby/join", {
+      const res = await server.post("/lobby/join", { // join said lobby;
         playerId: player._id,
         code: code.trim().toUpperCase(),
       });
   
-      const { lobby } = res.data;
+      const { lobby } = res.data; // proper destructure
   
-      // Update player Zustand state
-      setPlayer({
+      setPlayer({  // update player zustand state
         ...player,
         lobbyCode: lobby.code,
         isHost: false,
         score: 0,
       });
   
-      // Update player in DB
-      await server.put(`/player/${player._id}`, {
+      await server.put(`/player/${player._id}`, { // update player in db;
         lobbyCode: lobby.code,
         isHost: false,
         score: 0,
       });
   
-      // Update lobby Zustand state (if you use `setLobby`)
-      setLobby(lobby);
-  
-      // Navigate to the lobby page
-      navigate(`/lobby/${lobby.code}`);
+      setLobby(lobby); // update lobby in zustand;
+            
+      navigate(`/lobby/${lobby.code}`); // navigate player to lobby;
     } catch (err) {
       console.error("Failed to join lobby:", err);
       alert("Could not join lobby. Please check the code and try again.");
