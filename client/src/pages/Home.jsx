@@ -1,7 +1,7 @@
-import Header from "../components/Header";
-import PlayerSection from "../components/PlayerSection";
-import LobbySection from "../components/LobbySection";
-import Footer from "../components/Footer";
+import Header from "../components/Home/Header";
+import PlayerSection from "../components/Home/PlayerSection";
+import LobbySection from "../components/Home/LobbySection";
+import Footer from "../components/Home/Footer";
 import useRestorePlayer from "../hooks/restorePlayer.js";
 import usePlayerStore from "../stores/playerStore.js";
 
