@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import server from "../../utils/server";
+import server from "../../utils/server.js";
 import usePlayerStore from "../../stores/playerStore.js";
-import useLobbyStore from "../../stores/lobbyStore";
+import useLobbyStore from "../../stores/lobbyStore.js";
 
 const LobbySection = () => {
   const navigate = useNavigate();

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import server from "../../utils/server";
-import socket from "../../utils/socket";
+import server from "../../utils/server.js";
+import socket from "../../utils/socket.js";
 import usePlayerStore from "../../stores/playerStore.js";
 
 const PlayerSection = () => {

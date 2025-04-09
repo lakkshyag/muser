@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import useRestorePlayer from "../hooks/restorePlayer.js";
 import useRestoreLobby from "../hooks/restoreLobby.js";
 import LeftSidebar from "../components/Lobby/LeftSidebar.jsx";
-
+import MiddleSection from "../components/Lobby/MiddleSection.jsx";
+import GameSettingsSync from "../components/SocketSync/GameSettingsSync.jsx";
 
 const Lobby = () => {
   const navigate = useNavigate();
@@ -29,8 +30,9 @@ const Lobby = () => {
 
   return (
     <div className="flex flex-col md:flex-row h-screen">
+      <GameSettingsSync />
       <LeftSidebar />
-      {/* <CenterSection /> */}
+      <MiddleSection />
       {/* <RightSection /> */}
     </div>
   );
