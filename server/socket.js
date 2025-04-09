@@ -45,8 +45,7 @@ export default function setupSocket(io) {
             return;
           }
       
-          // Emit updated player list to others in the room
-          socket.to(lobbyCode).emit("player-left", { // updat
+          socket.to(lobbyCode).emit("player-left", { // updated player list to others in the room
             players: lobby.players,
             hostId: lobby.hostId.toString(), // send host ID too
           });
@@ -56,15 +55,12 @@ export default function setupSocket(io) {
       });
 
       socket.on("update-game-settings", ({ lobbyCode, settings }) => {
-        // Optional: Validate lobbyCode, maybe check if socket is host (can add later)
-        console.log(`[Server] Received settings update for lobby ${lobbyCode}`, settings);
-        // Broadcast the settings to all clients in that lobby
-        io.to(lobbyCode).emit("game-settings-updated", settings);
+        console.log(`received settings update for lobby ${lobbyCode}`, settings);
+        io.to(lobbyCode).emit("game-settings-updated", settings); // broadcast settings in the lobby
       });
 
       socket.on("start-game", ({ lobbyCode }) => {
-        // Broadcast to everyone in the lobby
-        io.to(lobbyCode).emit("game-started");
+        io.to(lobbyCode).emit("game-started"); // Broadcast to everyone in the lobby (in prog);
       });
 
       socket.on("disconnect", () => { // when client disconnects

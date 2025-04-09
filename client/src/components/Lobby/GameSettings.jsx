@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import useGameStore from "../../stores/gameStore.js";
 import useLobbyStore from "../../stores/lobbyStore.js"
 import usePlayerStore from "../../stores/playerStore.js";
@@ -38,8 +39,11 @@ const GameSettings = () => {
     setGameStarted,
   } = useGameStore();
 
-  const { player } = usePlayerStore();
-  const isHost = player.isHost; 
+  const isHost = usePlayerStore((state) => state.player?.isHost);
+
+  useEffect(() => {
+    console.log("isHost updated:", isHost);
+  }, [isHost]);
 
   const handleStartGame = () => {
     if (isHost) {

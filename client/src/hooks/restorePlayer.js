@@ -43,7 +43,7 @@ const useRestorePlayer = () => { // for restoring zustand with truth from db;
     };
 
     if (socket.connected) { // extremely bandaid fix but
-      restorePlayer(); // this will just for a restore on this page;
+      restorePlayer(); // this will  for a restore on this page;
     } else { 
       socket.on("connect", restorePlayer); // else if new socket due to whatever, we still have this;
     }

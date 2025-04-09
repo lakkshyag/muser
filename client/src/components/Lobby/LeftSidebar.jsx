@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import usePlayerStore from "../../stores/playerStore.js";
 import useLobbyStore from "../../stores/lobbyStore.js";
 import useDetectBackButton from "../../hooks/detectBackButton.js";
+import useSyncHostStatus from "../../hooks/syncHostStatus.js";
 import server from "../../utils/server.js";
 import socket from "../../utils/socket.js";
 
@@ -49,7 +50,7 @@ const LeftSidebar = () => {
     return () => {
       socket.off("player-left", handlePlayerLeft);
     };
-  }, [setPlayers, hostId, setHostId]);
+  }, [player, setPlayers, hostId, setHostId]);
   
   const handleLeaveLobby = async () => {
     try {
@@ -69,6 +70,7 @@ const LeftSidebar = () => {
     }
   };
 
+  useSyncHostStatus();
   useDetectBackButton(handleLeaveLobby);
 
   return (
