@@ -11,7 +11,7 @@ import socket from "../utils/socket.js";
 const Lobby = () => {
   const navigate = useNavigate();
   const { player } = usePlayerStore();
-  const { code, players, hostId, resetLobby, setPlayers } = useLobbyStore();
+  const { code, players, hostId, resetLobby, setPlayers, setHostId } = useLobbyStore();
   
   const playerRestored = useRestorePlayer();   // returns true | false | null
   const lobbyRestored = useRestoreLobby(playerRestored === true); // only try once player is ready
@@ -32,21 +32,22 @@ const Lobby = () => {
   }, [playerRestored, lobbyRestored, navigate]);
 
   useEffect(() => { // this is for actually emmitting the event after joining the lobby;
-    if (player && player._id && code) { // if player exists with a id and code as well;
-      console.log("emitting");
+    if (player && code) { // if player exists with a id and code as well;
+      console.log("emitting join lobby 1");
       socket.emit("join-lobby", {
         playerId: player._id,
         lobbyCode: code,
       });
     }
-  }, [player?._id, code]);
+  }, [player, code]);
 
   useEffect(() => { // this one is for dynamic player joins;
     if (!player || !code) return; // should not ideally hppen;
   
-    const handlePlayerJoined = (updatedPlayers) => { // get the updated player list;
-      console.log("Received updated players:", updatedPlayers);
-      setPlayers(updatedPlayers);
+    const handlePlayerJoined = ({players, hostId}) => { // get the updated player list;
+      console.log("socket up after joining:", {players, hostId});
+      setPlayers(players);
+      setHostId(hostId);
     };
   
     socket.on("player-joined", handlePlayerJoined);
@@ -54,11 +55,32 @@ const Lobby = () => {
     return () => {
       socket.off("player-joined", handlePlayerJoined);
     };
-  }, [player, code, setPlayers]);
+  }, [player, code, setPlayers, hostId, setHostId]);
+
+  useEffect(() => {
+    const handlePlayerLeft = ({players, hostId}) => {
+      console.log("socket up after leaving:", {players, hostId});
+      setPlayers(players);
+      setHostId(hostId);
+    };
+  
+    socket.on("player-left", handlePlayerLeft);
+  
+    return () => {
+      socket.off("player-left", handlePlayerLeft);
+    };
+  }, [setPlayers, hostId, setHostId]);
   
   const handleLeaveLobby = async () => {
     try {
       await server.post("/lobby/leave", { playerId: player._id });
+      console.log("emitting leave lobby 1");
+
+      socket.emit("leave-lobby", {
+        playerId: player._id,
+        lobbyCode: code, // pulled from Zustand before it's cleared
+      });
+
       resetLobby(); 
       navigate("/"); 
     } catch (err) {

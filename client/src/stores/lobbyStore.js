@@ -16,6 +16,8 @@ const useLobbyStore = create((set) => ({ // will most probably be changed
       status: status ?? "waiting",
     }),
 
+  setHostId: (hostId) => set({ hostId }),
+
   addPlayer: (player) =>
     set((state) => ({
       players: [...state.players, player],
@@ -33,6 +35,7 @@ const useLobbyStore = create((set) => ({ // will most probably be changed
 
   updateStatus: (newStatus) => set({ status: newStatus }),
 
+  
   resetLobby: () =>
     set({
       code: null,
