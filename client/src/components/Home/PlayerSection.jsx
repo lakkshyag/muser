@@ -12,7 +12,7 @@ const PlayerSection = () => {
     if (player?.name && name !== player.name) {
       setName(player.name);
     }
-  }, [player?.name]);
+  }, [player?.name, name]);
 
   const handleNameInput = (e) => { // taking input in the form;
     setName(e.target.value)

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import server from "../../utils/server";
-import socket from "../../utils/socket.js";
 import usePlayerStore from "../../stores/playerStore.js";
 import useLobbyStore from "../../stores/lobbyStore";
 
@@ -39,7 +38,7 @@ const LobbySection = () => {
       navigate(`/lobby/${lobby.code}`); // navigate the current player to the lobby
     } catch (err) {
       console.error("Failed to create lobby:", err);
-      alert("Failed to create lobby. Please try again.");
+      alert("Failed to create lobby. Please create another user and try again.");
     }
   };
 
