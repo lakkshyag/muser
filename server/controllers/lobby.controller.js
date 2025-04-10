@@ -123,15 +123,27 @@ export const getGameSettings = async (req, res) => { // getting the current game
 
 export const updateGameSettings = async (req, res) => { // updating the game settings
   try {
-    const settings  = req.body; // please think about the destructures and stuff;
+    const { settings, playerId } = req.body; // please think about the destructures and stuff, player id used to confirm if host;
 
-    const lobby = await Lobby.findOneAndUpdate(
-      { code: req.params.code },
-      { $set: { gameSettings: settings } },
-      { new: true }
-    );
-
+    const lobby = await Lobby.findOne({ code: req.params.code });
     if (!lobby) return res.status(404).json({ message: "Lobby not found" });
+
+    if (String(lobby.hostId) !== String(playerId)) { // only host of this lobby should be allwoed to change settings
+        return res.status(403).json({ message: "Only the host can update game settings." });
+    }
+    
+    lobby.gameSettings = {
+      ...lobby.gameSettings,
+      ...settings,
+    }
+    await lobby.save();
+
+    // const lobby = await Lobby.findOneAndUpdate(
+    //   { code: req.params.code },
+    //   { $set: { gameSettings: settings } },
+    //   { new: true }
+    // );
+
     res.json(lobby.gameSettings);
   } catch (err) {
     console.error("Error updating game settings:", err);

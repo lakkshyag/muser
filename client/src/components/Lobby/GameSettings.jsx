@@ -1,28 +1,41 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useGameStore from "../../stores/gameStore.js";
 import useLobbyStore from "../../stores/lobbyStore.js"
 import usePlayerStore from "../../stores/playerStore.js";
 import socket from "../../utils/socket.js";
+import server from "../../utils/server.js";
 
-const emitGameSettingsUpdate = () => {
-    const {
-      totalRounds,
-      roundTime,
-      gameMode,
-      inputMode
-    } = useGameStore.getState();
+const emitGameSettingsUpdate = async () => {
+  const {
+    totalRounds,
+    roundTime,
+    gameMode,
+    inputMode
+  } = useGameStore.getState();
+
+  const { player } = usePlayerStore.getState();
+  const { code } = useLobbyStore.getState();
+  const settings = {
+    totalRounds,
+    roundTime,
+    gameMode,
+    inputMode,
+  };
   
-    const { code } = useLobbyStore.getState();
-  
-    socket.emit("update-game-settings", {
-      lobbyCode : code,
-      settings: {
-        totalRounds,
-        roundTime,
-        gameMode,
-        inputMode,
-      },
+  try { // posting the game settings
+    await server.post(`/lobby/${code}/game-settings`, {
+      settings,
+      playerId: player._id,
     });
+
+    socket.emit("update-game-settings", { // emitting on the server
+      lobbyCode : code,
+      settings,
+    }); 
+  } catch (err) {
+    console.error("Failed to update game settings:", err);
+    alert("Error saving game settings. Please try again.");
+  }
 };
 
 const GameSettings = () => {
@@ -39,7 +52,9 @@ const GameSettings = () => {
     setGameStarted,
   } = useGameStore();
 
+  const { code } = useLobbyStore();
   const isHost = usePlayerStore((state) => state.player?.isHost);
+  const [loadingSettings, setLoadingSettings] = useState(true);
 
   useEffect(() => {
     console.log("isHost updated:", isHost);
@@ -53,6 +68,32 @@ const GameSettings = () => {
       // socket emit will go here later
     }
   };
+
+  useEffect(() => {
+    const fetchAndSetSettings = async () => {
+
+      setLoadingSettings(true);
+      console.log("fetching from db");
+
+      try {
+        const res = await server.get(`/lobby/${code}/game-settings`);
+        const settings = res.data;
+
+        setTotalRounds(settings.totalRounds);
+        setRoundTime(settings.roundTime);
+        setInputMode(settings.inputMode);
+        setGameMode(settings.gameMode);
+      } catch (err) {
+        console.error("Failed to fetch game settings:", err);
+      } finally {
+        setLoadingSettings(false);
+      }
+    };
+  
+    fetchAndSetSettings();
+  }, [code]);
+
+  if (loadingSettings) return <div className="text-center mt-10">Loading Game Settings...</div>; // maybe make a cute loading animation afterwards?
 
   return (
     <div className="bg-white rounded shadow p-6 w-full max-w-md mx-auto text-center">
