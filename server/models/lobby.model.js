@@ -12,7 +12,6 @@ const lobbySchema = new mongoose.Schema({ // use this with the lobby store
   },
   gameSettings: { // use this with the game store
     gameStarted: { type: Boolean, default: false },
-    currentRound: { type: Number, default: 0 },
     totalRounds: { type: Number, default: 10 },
     roundTime: { type: Number, default: 30 }, // in seconds
     inputMode: { type: String, enum: ["mcq", "typing"], default: "mcq" },

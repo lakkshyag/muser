@@ -8,6 +8,7 @@ import mongoose from "mongoose";
 import spotifyRouter from "./routes/spotify.route.js"; 
 import lobbyRouter from "./routes/lobby.route.js";
 import playerRouter from "./routes/player.route.js";
+import gameRouter from "./routes/game.route.js";
 
 dotenv.config();
 // console.log(process.env.SPOTIFY_CLIENT_ID);
@@ -32,6 +33,7 @@ mongoose.connect(mongoURI)
 app.use("/server/spotify", spotifyRouter);
 app.use("/server/lobby", lobbyRouter);
 app.use("/server/player", playerRouter);
+app.use("/server/game", gameRouter);
 
 
 const server = http.createServer(app); // giving access to raw http server

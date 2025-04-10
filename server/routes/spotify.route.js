@@ -10,5 +10,4 @@ router.post("/album", fetchAlbumTracks); // get all songs in an album
 router.get("/track/:id/preview", getPreviewUrl); // get the actual mp3 preview
 router.get("/track/:id/details", getTrackDetails); // get all details for a single tracj
 
-
 export default router;

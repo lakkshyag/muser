@@ -2,17 +2,16 @@
 import { authenticateSpotify, spotifyApi } from "../utils/spotifyAuth.js";
 import { cleanSpotifyUrl } from "../utils/cleanSpotifyUrl.js";
 import { getSpotifyPreviewUrl } from "../utils/getPreviewUrl.js";
+import { fetchTracksFromSource } from "../utils/spotifyTrackFetcher.js";
 
-// Playlist fetch handler
-export const fetchPlaylistTracks = async (req, res) => {
+export const fetchPlaylistTracks = async (req, res) => { // playlist fetch handler, not used rn
   const { playlistUrl } = req.body;
   if (!playlistUrl) return res.status(400).json({ error: "Playlist URL is required" });
 
   await authenticateSpotify();
   const cleanUrl = cleanSpotifyUrl(playlistUrl);
 
-  // Extract Playlist ID
-  const regex = /playlist\/([a-zA-Z0-9]+)/;
+  const regex = /playlist\/([a-zA-Z0-9]+)/; // xxtract playlist ID
   const match = cleanUrl.match(regex);
   if (!match) return res.status(400).json({ error: "Invalid Playlist URL" });
 
@@ -30,16 +29,14 @@ export const fetchPlaylistTracks = async (req, res) => {
   }
 };
 
-// Album fetch handler
-export const fetchAlbumTracks = async (req, res) => {
+export const fetchAlbumTracks = async (req, res) => { // album fetch handler, not being used rn
   const { albumUrl } = req.body;
   if (!albumUrl) return res.status(400).json({ error: "Album URL is required" });
 
   await authenticateSpotify();
   const cleanUrl = cleanSpotifyUrl(albumUrl);
 
-  // Extract Album ID
-  const regex = /album\/([a-zA-Z0-9]+)/;
+  const regex = /album\/([a-zA-Z0-9]+)/;   // xxtract Album ID
   const match = cleanUrl.match(regex);
   if (!match) return res.status(400).json({ error: "Invalid Album URL" });
 
