@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
+import debounce from "lodash/debounce";
 import useGameStore from "../../stores/gameStore.js";
 import useLobbyStore from "../../stores/lobbyStore.js"
 import usePlayerStore from "../../stores/playerStore.js";
 import socket from "../../utils/socket.js";
 import server from "../../utils/server.js";
 
-const emitGameSettingsUpdate = async () => {
+const emitGameSettingsUpdate = debounce(async () => {
   const {
     totalRounds,
     roundTime,
@@ -36,7 +37,7 @@ const emitGameSettingsUpdate = async () => {
     console.error("Failed to update game settings:", err);
     alert("Error saving game settings. Please try again.");
   }
-};
+}, 300); // 300ms delay
 
 const GameSettings = () => {
   const {
