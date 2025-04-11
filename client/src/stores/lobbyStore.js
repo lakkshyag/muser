@@ -4,15 +4,15 @@ const useLobbyStore = create((set) => ({ // will most probably be changed
   code: null,
   players: [],
   hostId: null,
-  playlistIds: [],
+  sources: [], // playlist but we can also add albums here so why not
   status: "waiting", 
 
-  setLobby: ({ code, players, hostId, playlistIds, status }) =>
+  setLobby: ({ code, players, hostId, sources, status }) =>
     set({
       code,
       players,
       hostId,
-      playlistIds: playlistIds ?? [],
+      sources: sources ?? [],
       status: status ?? "waiting",
     }),
 
@@ -41,7 +41,7 @@ const useLobbyStore = create((set) => ({ // will most probably be changed
       code: null,
       players: [],
       hostId: null,
-      playlistIds: [],
+      sources: [],
       status: "waiting",
     }),
 }));

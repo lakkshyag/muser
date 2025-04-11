@@ -14,7 +14,7 @@ export const startGame = async (req, res) => {
   const settings = lobby.gameSettings;
 
   // TODO
-  const tracksPool = await getRandomizedTrackPool(lobby.playlistIds);
+  const tracksPool = await getRandomizedTrackPool(lobby.sources);
 
   const gameSession = await GameSession.create({
     lobbyCode,

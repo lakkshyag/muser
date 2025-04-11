@@ -25,7 +25,7 @@ const useRestoreLobby = (shouldRestore) => { // assume useRestorePlayer() has be
           code: fetchedLobby.code,
           hostId: fetchedLobby.hostId,
           players: fetchedLobby.players,
-          playlistIds: fetchedLobby.playlistIds ?? [],
+          sources: fetchedLobby.sources ?? [],
           status: fetchedLobby.status ?? "waiting",
         });
 

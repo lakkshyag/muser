@@ -33,7 +33,7 @@ const Lobby = () => {
       <GameSettingsSync />
       <LeftSidebar />
       <MiddleSection />
-      {/* <RightSection /> */}
+      <RightSection />
     </div>
   );
 };
