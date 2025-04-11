@@ -210,7 +210,7 @@ export const removeSourceFromLobby = async (req, res) => {
       return res.status(403).json({ error: "Only the host can remove sources" });
     }
 
-    const cleanUrl = cleanSpotifyUrl(sourceUrl); // keep the clean thing only
+    const cleanUrl = cleanSpotifyUrl(sourceUrl); // since we are storing cleans, we can only erase cleans
 
     lobby.sources = lobby.sources.filter(source => source.url !== cleanUrl);
     await lobby.save();

@@ -32,9 +32,16 @@ const Lobby = () => {
   return (
     <div className="flex flex-col md:flex-row h-screen">
       <GameSettingsSync />
-      <LeftSidebar />
-      <MiddleSection />
-      <RightSidebar />
+      <div className="w-full md:w-1/4 p-4 overflow-y-auto">
+        <LeftSidebar />
+      </div>
+      <div className="w-full md:w-1/2 p-4 overflow-y-auto">
+        <MiddleSection />
+      </div>
+      {/* <div className="w-full md:w-1/4 p-4 overflow-y-auto"> */}
+      <div className="flex-1 p-4 overflow-y-auto">
+        <RightSidebar />
+      </div>
     </div>
   );
 };

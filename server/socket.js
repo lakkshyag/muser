@@ -59,6 +59,10 @@ export default function setupSocket(io) {
         io.to(lobbyCode).emit("game-settings-updated", settings); // broadcast settings in the lobby
       });
 
+      socket.on("update-sources", ({ code, sources }) => { // whenever playlists / albums change in the lobby
+        socket.to(code).emit("update-sources", { sources });
+      });
+
       socket.on("start-game", ({ lobbyCode }) => {
         io.to(lobbyCode).emit("game-started"); // Broadcast to everyone in the lobby (in prog);
       });
