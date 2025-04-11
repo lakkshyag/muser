@@ -4,7 +4,13 @@ const lobbySchema = new mongoose.Schema({ // use this with the lobby store
   code: { type: String, required: true, unique: true }, // lobby code
   hostId: { type: mongoose.Schema.Types.ObjectId, ref: "Player", required: true }, // host player id (reference)  players: { type: [playerSchema], default: [] }, // Embedded array of players
   players: [{ type: mongoose.Schema.Types.ObjectId, ref: "Player", default: [] }], // store player IDs instead of full player objects
-  sources: { type: [String], default: [] }, // playlist / album urls wll go here
+  sources: [
+    {
+      url: String,
+      name: String,
+    }
+  ], // album / playlist source url and the name
+
   status: {
     type: String,
     enum: ["waiting", "in_progress"],

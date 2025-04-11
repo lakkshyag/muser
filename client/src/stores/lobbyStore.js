@@ -18,6 +18,8 @@ const useLobbyStore = create((set) => ({ // will most probably be changed
 
   setHostId: (hostId) => set({ hostId }),
 
+  setSources: (newSources) => set({ sources: newSources }),
+
   addPlayer: (player) =>
     set((state) => ({
       players: [...state.players, player],

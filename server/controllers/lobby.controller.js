@@ -2,6 +2,9 @@
 import Lobby from "../models/lobby.model.js";
 import Player from "../models/player.model.js";
 import { generateLobbyCode } from "../utils/generateLobbyCode.js"; // join logic, WIP rn;
+import { cleanSpotifyUrl } from "../utils/cleanSpotifyUrl.js"
+import { spotifyApi, authenticateSpotify } from "../utils/spotifyAuth.js"
+import { getSpotifySourceName } from "../utils/spotifySourceName.js";
 
 export const createLobby = async (req, res) => { // create a new lobby
   try { // the host will try to create a lobby;
@@ -147,30 +150,47 @@ export const updateGameSettings = async (req, res) => { // updating the game set
 };
 
 export const addSourceToLobby = async (req, res) => {
-  const { code } = req.params; // code from the url where to add
-  const { playerId, sourceUrl } = req.body; // player id used to verify if host
+  const { code } = req.params;
+  const { playerId, sourceUrl } = req.body;
 
   if (!sourceUrl || !playerId) { // both should exist;
     return res.status(400).json({ error: "Missing playerId or sourceUrl" });
   }
 
   try {
+
     const lobby = await Lobby.findOne({ code }); // find lobby with code;
-    if (!lobby) return res.status(404).json({ error: "Lobby not found" }); // if it doesnt exist, cant do anything
+    if (!lobby) return res.status(404).json({ error: "Lobby not found." }); // if it doesnt exist, cant do anything
 
     if (lobby.hostId.toString() !== playerId) { // if player not host, cant add
       return res.status(403).json({ error: "Only the host can add sources" });
     }
 
-    if (!lobby.sources.includes(sourceUrl)) { // only add if this source already does not exist;
-      lobby.sources.push(sourceUrl);
-      await lobby.save();
+    const cleanUrl = cleanSpotifyUrl(sourceUrl); // keep the clean thing only
+    // console.log(cleanUrl);
+
+    const playlistMatch = cleanUrl.match(/playlist\/([a-zA-Z0-9]+)/); // regex match to see if its 
+    const albumMatch = cleanUrl.match(/album\/([a-zA-Z0-9]+)/); // playlist or album
+
+    if (!playlistMatch && !albumMatch) { // if doesnt match with both, its invalid
+      return res.status(400).json({ error: "Invalid Spotify URL." });
     }
 
-    res.json({ success: true, sources: lobby.sources });
+    await authenticateSpotify();
+
+    const name = await getSpotifySourceName(cleanUrl);    
+    const alreadyExists = lobby.sources.some(s => s.url === cleanUrl);
+    if (alreadyExists) { // dont have if this source is already added
+      return res.status(400).json({ error: "Source already added." });
+    }
+
+    lobby.sources.push({ url: cleanUrl, name });
+    await lobby.save(); // push the name and the clean url
+
+    res.json({ sources: lobby.sources });
   } catch (err) {
-    console.error("Error adding source:", err);
-    res.status(500).json({ error: "Failed to add source to lobby" });
+    console.error("Error adding source to lobby:", err);
+    res.status(500).json({ error: "Failed to add source." });
   }
 };
 
@@ -190,7 +210,9 @@ export const removeSourceFromLobby = async (req, res) => {
       return res.status(403).json({ error: "Only the host can remove sources" });
     }
 
-    lobby.sources = lobby.sources.filter(url => url !== sourceUrl);
+    const cleanUrl = cleanSpotifyUrl(sourceUrl); // keep the clean thing only
+
+    lobby.sources = lobby.sources.filter(source => source.url !== cleanUrl);
     await lobby.save();
 
     res.json({ success: true, sources: lobby.sources });
