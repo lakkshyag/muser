@@ -4,6 +4,7 @@ import useRestorePlayer from "../hooks/restorePlayer.js";
 import useRestoreLobby from "../hooks/restoreLobby.js";
 import LeftSidebar from "../components/Lobby/LeftSidebar.jsx";
 import MiddleSection from "../components/Lobby/MiddleSection.jsx";
+import RightSidebar from "../components/Lobby/RightSidebar.jsx"
 import GameSettingsSync from "../components/SocketSync/GameSettingsSync.jsx";
 
 const Lobby = () => {
@@ -33,7 +34,7 @@ const Lobby = () => {
       <GameSettingsSync />
       <LeftSidebar />
       <MiddleSection />
-      <RightSection />
+      <RightSidebar />
     </div>
   );
 };

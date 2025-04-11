@@ -123,7 +123,7 @@ export const getGameSettings = async (req, res) => { // getting the current game
 
 export const updateGameSettings = async (req, res) => { // updating the game settings
   try {
-    const { settings, playerId } = req.body; // please think about the destructures and stuff, player id used to confirm if host;
+    const { settings, playerId } = req.body; // player id used to confirm if host;
 
     const lobby = await Lobby.findOne({ code: req.params.code });
     if (!lobby) return res.status(404).json({ message: "Lobby not found" });
@@ -132,21 +132,70 @@ export const updateGameSettings = async (req, res) => { // updating the game set
         return res.status(403).json({ message: "Only the host can update game settings." });
     }
     
-    lobby.gameSettings = {
-      ...lobby.gameSettings,
+    lobby.gameSettings = { // change the new stuff;
+      ...lobby.gameSettings, 
       ...settings,
     }
-    await lobby.save();
 
-    // const lobby = await Lobby.findOneAndUpdate(
-    //   { code: req.params.code },
-    //   { $set: { gameSettings: settings } },
-    //   { new: true }
-    // );
+    await lobby.save(); // and save;
 
     res.json(lobby.gameSettings);
   } catch (err) {
     console.error("Error updating game settings:", err);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const addSourceToLobby = async (req, res) => {
+  const { code } = req.params; // code from the url where to add
+  const { playerId, sourceUrl } = req.body; // player id used to verify if host
+
+  if (!sourceUrl || !playerId) { // both should exist;
+    return res.status(400).json({ error: "Missing playerId or sourceUrl" });
+  }
+
+  try {
+    const lobby = await Lobby.findOne({ code }); // find lobby with code;
+    if (!lobby) return res.status(404).json({ error: "Lobby not found" }); // if it doesnt exist, cant do anything
+
+    if (lobby.hostId.toString() !== playerId) { // if player not host, cant add
+      return res.status(403).json({ error: "Only the host can add sources" });
+    }
+
+    if (!lobby.sources.includes(sourceUrl)) { // only add if this source already does not exist;
+      lobby.sources.push(sourceUrl);
+      await lobby.save();
+    }
+
+    res.json({ success: true, sources: lobby.sources });
+  } catch (err) {
+    console.error("Error adding source:", err);
+    res.status(500).json({ error: "Failed to add source to lobby" });
+  }
+};
+
+export const removeSourceFromLobby = async (req, res) => {
+  const { code } = req.params; // lobby code from the parameer;
+  const { playerId, sourceUrl } = req.body; // only host can remove;
+
+  if (!sourceUrl || !playerId) {
+    return res.status(400).json({ error: "Missing playerId or sourceUrl" });
+  }
+
+  try {
+    const lobby = await Lobby.findOne({ code }); // lobby should exist;
+    if (!lobby) return res.status(404).json({ error: "Lobby not found" });
+ 
+    if (lobby.hostId.toString() !== playerId) { // only host can remove;
+      return res.status(403).json({ error: "Only the host can remove sources" });
+    }
+
+    lobby.sources = lobby.sources.filter(url => url !== sourceUrl);
+    await lobby.save();
+
+    res.json({ success: true, sources: lobby.sources });
+  } catch (err) {
+    console.error("Error removing source:", err);
+    res.status(500).json({ error: "Failed to remove source from lobby" });
   }
 };
