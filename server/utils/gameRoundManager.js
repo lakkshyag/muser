@@ -33,6 +33,7 @@ export const startGameRound = async (lobbyCode) => {
       roundNumber: currentRound + 1,
       trackId,
       roundTime,
+      options
     });
 
     console.log("round started");

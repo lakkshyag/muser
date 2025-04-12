@@ -85,6 +85,7 @@ const GameSettings = () => {
       setLoadingSettings(true);
       console.log("fetching from db");
 
+      if (!code) return;
       try {
         const res = await server.get(`/lobby/${code}/game-settings`);
         const settings = res.data;

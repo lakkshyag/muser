@@ -25,6 +25,18 @@ const useGameStore = create((set) => ({ // dummy, will modify later
   setOptions: (opts) => set({ options: opts }),
   setCorrectAnswer: (ans) => set({ correctAnswer: ans }),
   setPlayerHasGuessed: (val) => set({ playerHasGuessed: val }),
+
+  resetGame: () =>
+    set({
+      gameStarted: false,
+      totalRounds: 10,
+      roundTime: 30,
+      inputMode: "mcq",
+      gameMode: "guess-song",
+      roundPhase: "waiting",
+      currentRound: 0,
+      options: [],
+    }),
 }));
 
 export default useGameStore;

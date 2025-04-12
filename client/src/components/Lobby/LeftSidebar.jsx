@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import usePlayerStore from "../../stores/playerStore.js";
 import useLobbyStore from "../../stores/lobbyStore.js";
+import useGameStore from "../../stores/gameStore.js";
+
 import useDetectBackButton from "../../hooks/detectBackButton.js";
 import useSyncHostStatus from "../../hooks/syncHostStatus.js";
 import server from "../../utils/server.js";
@@ -11,6 +13,7 @@ const LeftSidebar = () => {
   const navigate = useNavigate();
   const { player } = usePlayerStore();
   const { code, players, hostId, resetLobby, setPlayers, setHostId } = useLobbyStore();
+  const { resetGame } = useGameStore();
 
   useEffect(() => { // this is for actually emmitting the event after joining the lobby;
     if (player && code) { // if player exists with a id and code as well;
@@ -63,6 +66,7 @@ const LeftSidebar = () => {
       });
 
       resetLobby(); 
+      resetGame();
       navigate("/"); 
     } catch (err) {
       console.error("Failed to leave lobby:", err);
