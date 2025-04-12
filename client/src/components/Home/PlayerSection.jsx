@@ -5,22 +5,24 @@ import usePlayerStore from "../../stores/playerStore.js";
 
 const PlayerSection = () => {
   
-  const { player, setPlayer, resetPlayer } = usePlayerStore();
-  const [name, setName] = useState(player?.name || "");
+  const { player, setPlayer, updatePlayerField } = usePlayerStore();
+  // const [name, setName] = useState(player?.name || "");
 
-  useEffect(() => { // for the form, if global state already has values use that in the form;
-    if (player?.name && name !== player.name) {
-      setName(player.name);
-    }
-  }, [player?.name, name]);
+  // useEffect(() => { // for the form, if global state already has values use that in the form;
+  //   if (player?.name && player?.name !== player.name) {
+  //     setName(player.name);
+  //   }
+  // }, [player?.name]);
 
-  const handleNameInput = (e) => { // taking input in the form;
-    setName(e.target.value)
-    // console.log(name);
-  }
+  const handleNameInput = (e) => {
+    const newName = e.target.value;
+    updatePlayerField("name", newName);
 
+    console.log("Input:", newName);
+    console.log("Live Zustand name:", player?.name);
+  };
   const handleGuestJoin = async () => { // for the guest join thing;
-    if (!name || !socket.id) { // no name entry or no socket id
+    if (!player || !player.name || !socket.id) { // no name entry or no socket id
       return alert("Please enter a name.");
     }
 
@@ -36,7 +38,7 @@ const PlayerSection = () => {
 
     try { // now, we try to create the new player;
       const res = await server.post("/player/guest", {
-        name: name, // name 
+        name: player.name, // name 
         socketId: socket.id, // from socket id (VERY IMP)
       });
 
@@ -61,7 +63,7 @@ const PlayerSection = () => {
         type="text"
         placeholder="Enter your name"
         className="border px-3 py-2 rounded mb-3 w-60 text-black"
-        value={name}
+        value={player?.name || ""}
         onChange={handleNameInput}
       />
 

@@ -75,7 +75,7 @@ const LobbySection = () => {
 
   return (
     <div className="text-center">
-      <p className="text-lg mb-4">Welcome, {player.name}!</p> 
+      <p className="text-lg mb-4">Welcome {player.name}</p> 
       {/* this welcome can be removed; */}
 
       <div className="flex justify-center gap-4">

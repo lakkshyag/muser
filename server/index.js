@@ -38,7 +38,7 @@ app.use("/server/game", gameRouter);
 
 const server = http.createServer(app); // giving access to raw http server
 
-const io = new Server(server, { // initialize socket.io with the server;
+export const io = new Server(server, { // initialize socket.io with the server;
   cors: {
     origin: "http://localhost:3000", // frontend address;
     // origin: "*", // remove this and set the proper frontend address as origin

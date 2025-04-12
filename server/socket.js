@@ -1,6 +1,8 @@
 import Player from "./models/player.model.js";
 import Lobby from "./models/lobby.model.js";
 
+import { submitGuess } from "./utils/gameRoundManager.js";
+
 // "io" is the global socket.io server
 // "socket" is the individually connected client 
 export default function setupSocket(io) {
@@ -65,6 +67,11 @@ export default function setupSocket(io) {
 
       socket.on("start-game", ({ lobbyCode }) => {
         io.to(lobbyCode).emit("game-started"); // Broadcast to everyone in the lobby (in prog);
+      });
+
+      socket.on("submit-guess", ({ code, playerId, guess }) => {
+        console.log(`[${code}] Player ${playerId} guessed: ${guess}`);
+        submitGuess(code, playerId, guess); // store it
       });
 
       socket.on("disconnect", () => { // when client disconnects

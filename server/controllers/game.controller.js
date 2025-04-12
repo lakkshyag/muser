@@ -2,6 +2,7 @@ import GameSession from "../models/gameSession.model.js";
 import Lobby from "../models/lobby.model.js";
 import { getBalancedRandomizedTracks } from "../utils/getBalancedRandomizedTracks.js";
 import { fetchTracksFromSource } from "../utils/spotifyTrackFetcher.js";
+import { startGameRound } from "../utils/gameRoundManager.js";
 
 // export const getBalancedTracks = async (req, res) => { // returns tracks for the game based on playlists and round count
 //   const { urls, totalRounds } = req.body;
@@ -61,8 +62,8 @@ export const startGame = async (req, res) => {
     const totalRounds = lobby.gameSettings?.totalRounds || 10; // get the rounds from the lobby game settings
     const urls = lobby.sources?.map(source => source.url) || []; // get ONLY the urls from the lobby sources
 
-    console.log(totalRounds);
-    console.log();
+    // console.log(totalRounds);
+    // console.log();
     
 
     const tracks = await getBalancedTracks(urls, totalRounds); // fetch the required tracks using /generate-tracks;
@@ -87,6 +88,7 @@ export const startGame = async (req, res) => {
     });
 
     await gameSession.save();
+    startGameRound(code); // starts the round
 
     lobby.status = "in_progress"; // update the lobby status
     await lobby.save();

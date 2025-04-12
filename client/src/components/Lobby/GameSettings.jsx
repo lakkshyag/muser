@@ -54,6 +54,8 @@ const GameSettings = () => {
   } = useGameStore();
 
   const { code } = useLobbyStore();
+  const { player } = usePlayerStore();
+
   const isHost = usePlayerStore((state) => state.player?.isHost);
   const [loadingSettings, setLoadingSettings] = useState(true);
 
@@ -61,12 +63,19 @@ const GameSettings = () => {
     console.log("isHost updated:", isHost);
   }, [isHost]);
 
-  const handleStartGame = () => {
-    if (isHost) {
-      setGameStarted(true);
-      const { lobbyCode } = useLobbyStore.getState();
-      socket.emit("start-game", { lobbyCode });
-      // socket emit will go here later
+  const handleStartGame = async() => {
+    if (isHost) { // only poss if host;
+      try {
+        const res = await server.post(`/game/${code}/start`, {
+          playerId: player._id,
+        });
+
+        socket.emit("start-game", { lobbyCode: code });
+        console.log("Game start and emitted: ", res);
+        setGameStarted(true); // socket emit will go here later
+      } catch (err) {
+        console.error("Failed to start game: ", err);
+      }
     }
   };
 

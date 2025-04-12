@@ -15,8 +15,8 @@ const Home = () => {
       <Header />
       <div className="flex flex-col gap-8 items-center mt-10 flex-grow">
         <PlayerSection />
-        {player ? <LobbySection /> : <></>}
-         {/*^^ only render the lobby section if there is player present*/}
+        {player && player._id ? <LobbySection /> : <></>}
+         {/*^^ only render the lobby section if there is player present in state AND made on the db*/}
       </div>
       <Footer />
     </div>
